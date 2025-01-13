@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:tiktok/constatns.dart';
+import 'package:tiktok/views/widgets/text_input_field.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  LoginScreen({super.key});
+
+  final TextEditingController _emailControlelr = TextEditingController();
+  final TextEditingController _passwordControlelr = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -11,6 +15,7 @@ class LoginScreen extends StatelessWidget {
         child: Container(
             alignment: Alignment.center,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   "Tiktok",
@@ -23,8 +28,70 @@ class LoginScreen extends StatelessWidget {
                   "Login",
                   style: TextStyle(fontSize: 25, fontWeight: FontWeight.w700),
                 ),
-                SizedBox(height: 25,),
-                Container()
+                const SizedBox(
+                  height: 25,
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  child: TextInputField(
+                      textEditingController: _emailControlelr,
+                      labelText: "Email",
+                      icon: Icons.email),
+                ),
+                const SizedBox(
+                  height: 25,
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  child: TextInputField(
+                      textEditingController: _passwordControlelr,
+                      labelText: "Password",
+                      isObscure: true,
+                      icon: Icons.password),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: buttonColor,
+                    borderRadius: const BorderRadius.all(Radius.circular(5)),
+                  ),
+                  child: InkWell(
+                    onTap: () {},
+                    child: const Center(
+                      child: Text(
+                        "Login",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 25,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "Don't have an account? ",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    InkWell(
+                      onTap: () {},
+                      child: Text(
+                        "Register",
+                        style: TextStyle(fontSize: 20, color: buttonColor),
+                      ),
+                    )
+                  ],
+                )
               ],
             )),
       ),
