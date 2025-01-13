@@ -7,9 +7,9 @@ import 'package:tiktok/views/widgets/text_input_field.dart';
 class RegisterScreen extends StatelessWidget {
   RegisterScreen({super.key});
 
-  final TextEditingController _emailControlelr = TextEditingController();
-  final TextEditingController _passwordControlelr = TextEditingController();
-  final TextEditingController _userNameControlelr = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _userNameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +46,7 @@ class RegisterScreen extends StatelessWidget {
                         bottom: -10,
                         left: 80,
                         child: IconButton(
-                            onPressed: () {},
+                            onPressed: () => authController.pickImage(),
                             icon: const Icon(Icons.add_a_photo)))
                   ],
                 ),
@@ -57,7 +57,7 @@ class RegisterScreen extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   child: TextInputField(
-                      textEditingController: _userNameControlelr,
+                      textEditingController: _userNameController,
                       labelText: "User Name",
                       icon: Icons.person),
                 ),
@@ -68,7 +68,7 @@ class RegisterScreen extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   child: TextInputField(
-                      textEditingController: _emailControlelr,
+                      textEditingController: _emailController,
                       labelText: "Email",
                       icon: Icons.email),
                 ),
@@ -79,7 +79,7 @@ class RegisterScreen extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   child: TextInputField(
-                      textEditingController: _passwordControlelr,
+                      textEditingController: _passwordController,
                       labelText: "Password",
                       isObscure: true,
                       icon: Icons.password),
@@ -96,7 +96,11 @@ class RegisterScreen extends StatelessWidget {
                     borderRadius: const BorderRadius.all(Radius.circular(5)),
                   ),
                   child: InkWell(
-                    onTap: () {},
+                    onTap: () => authController.registerUser(
+                        _userNameController.text,
+                        _emailController.text,
+                        _passwordController.text,
+                        authController.profilePhoto),
                     child: const Center(
                       child: Text(
                         "Register",
