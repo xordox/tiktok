@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:tiktok/constatns.dart';
 import 'package:tiktok/views/widgets/text_input_field.dart';
 
-class LoginScreen extends StatelessWidget {
-  LoginScreen({super.key});
+class RegisterScreen extends StatelessWidget {
+  RegisterScreen({super.key});
 
   final TextEditingController _emailControlelr = TextEditingController();
   final TextEditingController _passwordControlelr = TextEditingController();
+  final TextEditingController _userNameControlelr = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +28,38 @@ class LoginScreen extends StatelessWidget {
                       fontWeight: FontWeight.w800),
                 ),
                 const Text(
-                  "Login",
+                  "Sign Up",
                   style: TextStyle(fontSize: 25, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(
+                  height: 25,
+                ),
+                Stack(
+                  children: [
+                    const CircleAvatar(
+                      radius: 64,
+                      backgroundImage: NetworkImage(
+                          "https://media.istockphoto.com/id/1388644810/photo/happy-caucasian-young-man-using-smart-phone-cellphone-for-calls-social-media-mobile.jpg?s=612x612&w=is&k=20&c=PUZXtvF8m_u85NGfqxQFWio8l2mxyRweWfps3ACCRJY="),
+                      backgroundColor: Colors.black,
+                    ),
+                    Positioned(
+                        bottom: -10,
+                        left: 80,
+                        child: IconButton(
+                            onPressed: () {},
+                            icon: const Icon(Icons.add_a_photo)))
+                  ],
+                ),
+                const SizedBox(
+                  height: 25,
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  child: TextInputField(
+                      textEditingController: _userNameControlelr,
+                      labelText: "User Name",
+                      icon: Icons.person),
                 ),
                 const SizedBox(
                   height: 25,
@@ -65,12 +96,10 @@ class LoginScreen extends StatelessWidget {
                     borderRadius: const BorderRadius.all(Radius.circular(5)),
                   ),
                   child: InkWell(
-                    onTap: () {
-                      log("login");
-                    },
+                    onTap: () {},
                     child: const Center(
                       child: Text(
-                        "Login",
+                        "Register",
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.w700),
                       ),
@@ -84,15 +113,13 @@ class LoginScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                      "Don't have an account? ",
+                      "Already have an account? ",
                       style: TextStyle(fontSize: 20),
                     ),
                     InkWell(
-                      onTap: () {
-                        log("register");
-                      },
+                      onTap: () {},
                       child: Text(
-                        "Register",
+                        "Login",
                         style: TextStyle(fontSize: 20, color: buttonColor),
                       ),
                     )
