@@ -1,0 +1,150 @@
+{
+  "project_info": {
+    "project_number": "893828774013",
+    "project_id": "japan-samachar",
+    "storage_bucket": "japan-samachar.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:893828774013:android:af508ca07f30f960445914",
+        "android_client_info": {
+          "package_name": "com.example.tiktok"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "893828774013-019hhkrok8u9b874oagetd6vmktbagg1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTrzcDfq5yEypI0KQXLYkzoGxS8o7KyC4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "893828774013-019hhkrok8u9b874oagetd6vmktbagg1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "893828774013-c1bsc1ofdlv63a6iobtpjuitkdkenft9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.japansamachar.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:893828774013:android:66ff7d4038983268445914",
+        "android_client_info": {
+          "package_name": "com.japansamachar.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "893828774013-69gpc7upqfm0ft254ktkq4hs5rhdb694.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.japansamachar.app",
+            "certificate_hash": "9858b5fc98bfc0ab3fc886d8f2363a5bdc27b74e"
+          }
+        },
+        {
+          "client_id": "893828774013-9mdd4vbsfp12nn1a7ivia5d6gj17frpj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.japansamachar.app",
+            "certificate_hash": "0d1c0453989e9e9ec70565c2b33f5375e5d10059"
+          }
+        },
+        {
+          "client_id": "893828774013-019hhkrok8u9b874oagetd6vmktbagg1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTrzcDfq5yEypI0KQXLYkzoGxS8o7KyC4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "893828774013-019hhkrok8u9b874oagetd6vmktbagg1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "893828774013-c1bsc1ofdlv63a6iobtpjuitkdkenft9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.japansamachar.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:893828774013:android:f896783e1cabd233445914",
+        "android_client_info": {
+          "package_name": "com.xordox.japan_samachar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "893828774013-c76339o1lvs2g8kgccl2ugnmvh52p84c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.xordox.japan_samachar",
+            "certificate_hash": "0d1c0453989e9e9ec70565c2b33f5375e5d10059"
+          }
+        },
+        {
+          "client_id": "893828774013-dsuftri8khfv7javk50rcoubkf0srkco.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.xordox.japan_samachar",
+            "certificate_hash": "9858b5fc98bfc0ab3fc886d8f2363a5bdc27b74e"
+          }
+        },
+        {
+          "client_id": "893828774013-019hhkrok8u9b874oagetd6vmktbagg1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTrzcDfq5yEypI0KQXLYkzoGxS8o7KyC4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "893828774013-019hhkrok8u9b874oagetd6vmktbagg1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "893828774013-c1bsc1ofdlv63a6iobtpjuitkdkenft9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.japansamachar.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
