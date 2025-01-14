@@ -16,6 +16,18 @@ class VideoScreen extends StatelessWidget {
 
   final VideoController videoController = Get.put(VideoController());
 
+  void _showModalBottomSheet(BuildContext context, String id) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return CommentScreen(id: id);
+      },
+    );
+  }
+
   buildProfile(String profilePhoto) {
     return SizedBox(
       width: 60,
@@ -80,6 +92,7 @@ class VideoScreen extends StatelessWidget {
     return Scaffold(
       body: Obx(() {
         return PageView.builder(
+            scrollDirection: Axis.vertical,
             itemCount: videoController.videoList.length,
             controller: PageController(initialPage: 0, viewportFraction: 1),
             itemBuilder: (context, index) {
@@ -174,12 +187,14 @@ class VideoScreen extends StatelessWidget {
                                       height: 7,
                                     ),
                                     InkWell(
-                                      onTap: () => Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  CommentScreen(
-                                                    id: authController.user.uid,
-                                                  ))),
+                                      // onTap: () => Navigator.of(context).push(
+                                      //     MaterialPageRoute(
+                                      //         builder: (context) =>
+                                      //             CommentScreen(
+                                      //               id: authController.user.uid,
+                                      //             ))),
+                                      onTap: () => _showModalBottomSheet(
+                                          context, authController.user.uid),
                                       child: const Icon(
                                         Icons.comment,
                                         size: 40,
