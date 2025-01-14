@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:tiktok/controllers/auth_controller.dart';
 import 'package:tiktok/views/screens/add_video_screen.dart';
+import 'package:tiktok/views/screens/video_screen.dart';
 
 //app colors
 const backgroundColor = Colors.black;
@@ -18,10 +19,10 @@ var firestore = FirebaseFirestore.instance;
 //controller
 var authController = AuthController.instance;
 
-const pages = [
-  Text("Home Screen"),
-  Text("Add Page Screen"),
-  AddVideoScreen(),
-  Text("Message Screen"),
-  Text("Profile Screen"),
+List pages = [
+  VideoScreen(),
+  const Text("Add Page Screen"),
+  const AddVideoScreen(),
+  const Text("Message Screen"),
+  const Text("Profile Screen"),
 ];
