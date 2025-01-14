@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tiktok/constatns.dart';
+import 'package:tiktok/constants.dart';
 import 'package:tiktok/controllers/auth_controller.dart';
 import 'package:tiktok/views/screens/authentication/login_screen.dart';
 import 'package:tiktok/views/screens/authentication/register_screen.dart';
