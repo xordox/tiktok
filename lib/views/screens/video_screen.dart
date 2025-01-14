@@ -23,7 +23,7 @@ class VideoScreen extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
-        return CommentScreen(id: id);
+        return CommentScreen(videoId: id);
       },
     );
   }
@@ -194,7 +194,7 @@ class VideoScreen extends StatelessWidget {
                                       //               id: authController.user.uid,
                                       //             ))),
                                       onTap: () => _showModalBottomSheet(
-                                          context, authController.user.uid),
+                                          context, data.videoUrl),
                                       child: const Icon(
                                         Icons.comment,
                                         size: 40,

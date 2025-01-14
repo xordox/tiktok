@@ -1,154 +1,136 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:isar/isar.dart';
 import 'package:tiktok/constants.dart';
 import 'package:tiktok/controllers/comment_controller.dart';
+import 'package:tiktok/main.dart';
+import 'package:tiktok/models/video_comment.dart';
 import 'package:timeago/timeago.dart' as tago;
 
 class CommentScreen extends StatefulWidget {
-  final String id;
-  CommentScreen({
-    super.key,
-    required this.id,
-  });
+  final String videoId;
+
+  const CommentScreen({required this.videoId, super.key});
 
   @override
-  State<CommentScreen> createState() => _CommentScreenState();
+  _CommentScreenState createState() => _CommentScreenState();
 }
 
 class _CommentScreenState extends State<CommentScreen> {
-  final TextEditingController _commentController = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
+  late Isar _isar;
+  late String imgUrl;
+  late String userName;
 
-  CommentController commentController = Get.put(CommentController());
+  @override
+  void initState() {
+    super.initState();
+    _isar = isar; // Use the global Isar instance
+    getUserProfileDetails();
+    _getCommentsForVideo();
+  }
+
+  getUserProfileDetails() async {
+    DocumentSnapshot userDoc =
+        await firestore.collection('users').doc(authController.user.uid).get();
+    imgUrl = (userDoc.data()! as dynamic)['profileImage'];
+    userName = (userDoc.data()! as dynamic)['name'];
+
+    log("imgUrl: $imgUrl ");
+    log(" userName: $userName");
+  }
+
+  Future<void> _addComment(String message) async {
+    log("before adding");
+    final newComment = VideoComment(
+      videoId: widget.videoId,
+      username: userName,
+      comment: message,
+      timestamp: DateTime.now(),
+      imageUrl: imgUrl,
+    );
+    log("after adding");
+
+    await _isar.writeTxn(() async {
+      final id = await _isar.videoComments.put(newComment);
+      log("Comment added with ID: $id");
+    });
+
+    _controller.clear();
+    setState(() {});
+  }
+
+  Future<List<VideoComment>> _getCommentsForVideo() async {
+    final comments = await _isar.videoComments
+        .filter()
+        .videoIdEqualTo(widget.videoId)
+        .findAll();
+
+    log("Comments fetched: ${comments.length}");
+    return comments;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    commentController.updatePostId(widget.id);
-
     return Scaffold(
+      appBar: AppBar(title: const Text("Comments")),
       body: Column(
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              child: SizedBox(
-                width: size.width,
-                height: size.height,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: Obx(() {
-                        return ListView.builder(
-                            itemCount: commentController.comments.length,
-                            itemBuilder: (context, index) {
-                              final comment = commentController.comments[index];
-                              return ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor: Colors.black,
-                                  backgroundImage:
-                                      NetworkImage(comment.profilePhoto),
-                                ),
-                                title: Row(
-                                  children: [
-                                    Text(
-                                      "${comment.username}  ",
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    Text(
-                                      comment.comment,
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                subtitle: Row(
-                                  children: [
-                                    Text(
-                                      tago.format(
-                                        comment.datePublished.toDate(),
-                                      ),
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text(
-                                      '${comment.likes.length} likes',
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                trailing: InkWell(
-                                  onTap: () =>
-                                      commentController.likeComment(comment.id),
-                                  child: Icon(
-                                    Icons.favorite,
-                                    size: 25,
-                                    color: comment.likes
-                                            .contains(authController.user.uid)
-                                        ? Colors.red
-                                        : Colors.white,
-                                  ),
-                                ),
-                              );
-                            });
-                      }),
-                    ),
-                  ],
-                ),
-              ),
+            child: FutureBuilder<List<VideoComment>>(
+              future: _getCommentsForVideo(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("No comments yet!"));
+                }
+
+                final comments = snapshot.data!;
+                return ListView.builder(
+                  itemCount: comments.length,
+                  itemBuilder: (context, index) {
+                    final comment = comments[index];
+                    return ListTile(
+                      title: Text(comment.username),
+                      subtitle: Text(comment.comment),
+                      trailing: Text(
+                        "${comment.timestamp.hour}:${comment.timestamp.minute}",
+                      ),
+                    );
+                  },
+                );
+              },
             ),
           ),
-          const Divider(),
-          ListTile(
-            title: TextFormField(
-              controller: _commentController,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.white,
-              ),
-              decoration: const InputDecoration(
-                labelText: 'Comment',
-                labelStyle: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Colors.red,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: const InputDecoration(
+                      labelText: "Add a comment...",
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Colors.red,
-                  ),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: () {
+                    if (_controller.text.trim().isNotEmpty) {
+                      _addComment(_controller.text.trim());
+                    }
+                  },
                 ),
-              ),
-            ),
-            trailing: TextButton(
-              onPressed: () =>
-                  commentController.postComment(_commentController.text),
-              child: const Text(
-                'Send',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
-              ),
+              ],
             ),
           ),
         ],
