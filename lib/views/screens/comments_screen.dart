@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:developer';
+import 'dart:math' as Math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
@@ -25,13 +27,45 @@ class _CommentScreenState extends State<CommentScreen> {
   late Isar _isar;
   late String imgUrl;
   late String userName;
+  Timer? _botTimer;
+  String botUrl =
+      "https://media.istockphoto.com/id/2177271654/vector/illustration-of-robot-icon-in-flat-style-illustration-of-childrens-toy.jpg?s=2048x2048&w=is&k=20&c=QfEiKopoGW3xtjAqO6yCxUCHbCqdmebsNo7RSQpm7g4=";
+
+  // Resets the bot timer
+  void _resetBotTimer() {
+    _botTimer?.cancel(); // Cancel any existing timer
+    _botTimer =
+        Timer(const Duration(seconds: 5), _postBotComment); // Start a new timer
+  }
+
+  // Posts a bot comment
+  void _postBotComment() {
+    final botComments = [
+      "Great video!",
+      "This is so interesting!",
+      "Awesome content!",
+      "Keep it up!",
+      "Loved this part!",
+      "Can't wait for more!",
+    ];
+    final randomComment =
+        botComments[Math.Random().nextInt(botComments.length)];
+    _addComment(comment: randomComment, isBot: true);
+  }
 
   @override
   void initState() {
     super.initState();
-    _isar = isar; // Use the global Isar instance
+    _isar = isar;
     getUserProfileDetails();
     _getCommentsForVideo();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _botTimer?.cancel();
+    super.dispose();
   }
 
   getUserProfileDetails() async {
@@ -44,14 +78,15 @@ class _CommentScreenState extends State<CommentScreen> {
     log(" userName: $userName");
   }
 
-  Future<void> _addComment(String message) async {
+  Future<void> _addComment(
+      {required String comment, bool isBot = false}) async {
     log("before adding");
     final newComment = VideoComment(
       videoId: widget.videoId,
-      username: userName,
-      comment: message,
+      username: isBot ? "Bot" : userName,
+      comment: comment,
       timestamp: DateTime.now(),
-      imageUrl: imgUrl,
+      imageUrl: isBot ? botUrl : imgUrl,
     );
     log("after adding");
 
@@ -61,6 +96,7 @@ class _CommentScreenState extends State<CommentScreen> {
     });
 
     _controller.clear();
+    _resetBotTimer(); // Reset the timer whenever a comment is added
     setState(() {});
   }
 
@@ -126,7 +162,7 @@ class _CommentScreenState extends State<CommentScreen> {
                   icon: const Icon(Icons.send),
                   onPressed: () {
                     if (_controller.text.trim().isNotEmpty) {
-                      _addComment(_controller.text.trim());
+                      _addComment(comment: _controller.text.trim());
                     }
                   },
                 ),
