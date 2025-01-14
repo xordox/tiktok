@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'package:tiktok/constants.dart';
 import 'package:tiktok/controllers/auth_controller.dart';
@@ -197,7 +198,10 @@ class VideoScreen extends StatelessWidget {
                                       height: 7,
                                     ),
                                     InkWell(
-                                      onTap: () {},
+                                      onTap: () {
+                                        Share.shareUri(
+                                            Uri.parse(data.videoUrl));
+                                      },
                                       child: const Icon(
                                         Icons.share,
                                         size: 40,

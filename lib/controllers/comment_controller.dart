@@ -52,7 +52,7 @@ class CommentController extends GetxController {
           comment: commentText.trim(),
           datePublished: DateTime.now(),
           likes: [],
-          profilePhoto: (userDoc.data()! as dynamic)['profilePhoto'],
+          profilePhoto: (userDoc.data()! as dynamic)['profileImage'],
           uid: authController.user.uid,
           id: 'Comment $len',
         );
@@ -67,7 +67,7 @@ class CommentController extends GetxController {
         DocumentSnapshot doc =
             await firestore.collection('videos').doc(_postId).get();
         await firestore.collection('videos').doc(_postId).update({
-          'commentCount': (doc.data()! as dynamic)['commentCount'] + 1,
+          'commentCount': (doc.data()! as dynamic)['commentCount'] + 1,//issue
         });
       }
     } catch (e) {
