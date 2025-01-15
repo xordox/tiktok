@@ -4,7 +4,7 @@ part 'video_comment.g.dart';
 
 @collection
 class VideoComment {
-  Id id = Isar.autoIncrement; // Auto-incremented ID
+  Id id = Isar.autoIncrement; 
 
   @Index()
   late String videoId;

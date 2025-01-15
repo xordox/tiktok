@@ -1,110 +1,98 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:get/get.dart';
+import 'dart:async';
+import 'dart:developer';
+import 'dart:math' as Math;
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar/isar.dart';
+import 'package:tiktok/main.dart';
+import 'package:tiktok/models/video_comment.dart';
 import 'package:tiktok/constants.dart';
-import 'package:tiktok/models/comment.dart';
 
-class CommentController extends GetxController {
-  final Rx<List<Comment>> _comments = Rx<List<Comment>>([]);
-  List<Comment> get comments => _comments.value;
-
-  String _postId = "";
-
-  updatePostId(String id) {
-    _postId = id;
-    getComment();
-  }
-
-  getComment() async {
-    _comments.bindStream(
-      firestore
-          .collection('videos')
-          .doc(_postId)
-          .collection('comments')
-          .snapshots()
-          .map(
-        (QuerySnapshot query) {
-          List<Comment> retValue = [];
-          for (var element in query.docs) {
-            retValue.add(Comment.fromSnap(element));
-          }
-          return retValue;
-        },
-      ),
-    );
-  }
-
-  postComment(String commentText) async {
-    try {
-      if (commentText.isNotEmpty) {
-        DocumentSnapshot userDoc = await firestore
-            .collection('users')
-            .doc(authController.user.uid)
-            .get();
-        var allDocs = await firestore
-            .collection('videos')
-            .doc(_postId)
-            .collection('comments')
-            .get();
-        int len = allDocs.docs.length;
-
-        Comment comment = Comment(
-          username: (userDoc.data()! as dynamic)['name'],
-          comment: commentText.trim(),
-          datePublished: DateTime.now(),
-          likes: [],
-          profilePhoto: (userDoc.data()! as dynamic)['profileImage'],
-          uid: authController.user.uid,
-          id: 'Comment $len',
-        );
-        await firestore
-            .collection('videos')
-            .doc(_postId)
-            .collection('comments')
-            .doc('Comment $len')
-            .set(
-              comment.toJson(),
-            );
-        DocumentSnapshot doc =
-            await firestore.collection('videos').doc(_postId).get();
-        await firestore.collection('videos').doc(_postId).update({
-          'commentCount': (doc.data()! as dynamic)['commentCount'] + 1,//issue
-        });
-      }
-    } catch (e) {
-      Get.snackbar(
-        'Error While Commenting',
-        e.toString(),
+final commentControllerProvider =
+    StateNotifierProvider<CommentController, List<VideoComment>>((ref) {
+  final isar = ref.watch(isarProvider).maybeWhen(
+        data: (isar) => isar,
+        orElse: () => null,
       );
-    }
+  return CommentController(isar);
+});
+
+class CommentController extends StateNotifier<List<VideoComment>> {
+  final Isar? isar;
+  Timer? _botTimer;
+
+  CommentController(this.isar) : super([]);
+
+  // Fetch comments for a video
+  Future<void> fetchComments(String videoId) async {
+    if (isar == null) return;
+    final comments = await isar!.videoComments
+        .filter()
+        .videoIdEqualTo(videoId)
+        .findAll();
+    state = comments;
+    log("Fetched ${comments.length} comments for video $videoId");
   }
 
-  likeComment(String id) async {
-    var uid = authController.user.uid;
-    DocumentSnapshot doc = await firestore
-        .collection('videos')
-        .doc(_postId)
-        .collection('comments')
-        .doc(id)
-        .get();
+  // Add a comment
+  Future<void> addComment(
+      {required String videoId,
+      required String username,
+      required String comment,
+      required String imageUrl,
+      bool isBot = false}) async {
+    if (isar == null) return;
 
-    if ((doc.data()! as dynamic)['likes'].contains(uid)) {
-      await firestore
-          .collection('videos')
-          .doc(_postId)
-          .collection('comments')
-          .doc(id)
-          .update({
-        'likes': FieldValue.arrayRemove([uid]),
-      });
-    } else {
-      await firestore
-          .collection('videos')
-          .doc(_postId)
-          .collection('comments')
-          .doc(id)
-          .update({
-        'likes': FieldValue.arrayUnion([uid]),
-      });
-    }
+    final newComment = VideoComment(
+      videoId: videoId,
+      username: isBot ? "Bot" : username,
+      comment: comment,
+      timestamp: DateTime.now(),
+      imageUrl: isBot ? "botUrl" : imageUrl,
+    );
+
+    await isar!.writeTxn(() async {
+      await isar!.videoComments.put(newComment);
+    });
+
+    // Refresh the comments
+    fetchComments(videoId);
+
+    // Reset bot timer
+    if (!isBot) _resetBotTimer(videoId);
+  }
+
+  // Handle bot comments
+  void _resetBotTimer(String videoId) {
+    _botTimer?.cancel();
+    _botTimer = Timer(const Duration(seconds: 5), () {
+      final botComments = [
+        "Great video!",
+        "This is so interesting!",
+        "Awesome content!",
+        "Keep it up!",
+        "Loved this part!",
+        "Can't wait for more!",
+      ];
+      final randomComment =
+          botComments[Math.Random().nextInt(botComments.length)];
+      addComment(
+        videoId: videoId,
+        username: "Bot",
+        comment: randomComment,
+        imageUrl: "botUrl",
+        isBot: true,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _botTimer?.cancel();
+    super.dispose();
   }
 }
+
+
+
+

@@ -2,71 +2,91 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiktok/constants.dart';
 import 'package:tiktok/models/video.dart';
 import 'package:video_compress/video_compress.dart';
 
-import 'dart:developer';
-import 'dart:io';
+final uploadVideoProvider =
+    StateNotifierProvider<VideoUploadNotifier, UploadState>((ref) {
+  return VideoUploadNotifier();
+});
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:get/get.dart';
-import 'package:tiktok/constants.dart';
-import 'package:tiktok/models/video.dart';
-import 'package:video_compress/video_compress.dart';
+class UploadState {
+  final bool isUploading;
+  final String? errorMessage;
 
-class UploadVideoController extends GetxController {
-  _compressVideo(String videoPath) async {
+  UploadState({this.isUploading = false, this.errorMessage});
+
+  UploadState copyWith({bool? isUploading, String? errorMessage}) {
+    return UploadState(
+      isUploading: isUploading ?? this.isUploading,
+      errorMessage: errorMessage,
+    );
+  }
+}
+
+class VideoUploadNotifier extends StateNotifier<UploadState> {
+  VideoUploadNotifier() : super(UploadState());
+
+  final FirebaseFirestore _firestore = firestore;
+  final FirebaseStorage _firebaseStorage = firebaseStorage;
+  final FirebaseAuth _firebaseAuth = firebaseAuth;
+
+  Future<File> _compressVideo(String videoPath) async {
     final compressedVideo = await VideoCompress.compressVideo(
       videoPath,
       quality: VideoQuality.MediumQuality,
     );
-    return compressedVideo!.file;
+    return compressedVideo!.file!;
   }
 
   Future<String> _uploadVideoToStorage(String id, String videoPath) async {
-    Reference ref = firebaseStorage.ref().child('videos').child(id);
-
+    Reference ref = _firebaseStorage.ref().child('videos').child(id);
     UploadTask uploadTask = ref.putFile(await _compressVideo(videoPath));
-    log("test1");
     TaskSnapshot snap = await uploadTask;
     String downloadUrl = await snap.ref.getDownloadURL();
-    log("downloadUrl: $downloadUrl");
+    log("Video URL: $downloadUrl");
     return downloadUrl;
   }
 
-  _getThumbnail(String videoPath) async {
+  Future<File> _getThumbnail(String videoPath) async {
     final thumbnail = await VideoCompress.getFileThumbnail(videoPath);
     return thumbnail;
   }
 
   Future<String> _uploadImageToStorage(String id, String videoPath) async {
-    Reference ref = firebaseStorage.ref().child('thumbnails').child(id);
+    Reference ref = _firebaseStorage.ref().child('thumbnails').child(id);
     UploadTask uploadTask = ref.putFile(await _getThumbnail(videoPath));
     TaskSnapshot snap = await uploadTask;
     String downloadUrl = await snap.ref.getDownloadURL();
+    log("Thumbnail URL: $downloadUrl");
     return downloadUrl;
   }
 
-  // upload video
-  uploadVideo(String songName, String caption, String videoPath) async {
+  Future<void> uploadVideo(String songName, String caption, String videoPath) async {
     try {
-      String uid = firebaseAuth.currentUser!.uid;
-      DocumentSnapshot userDoc =
-          await firestore.collection('users').doc(uid).get();
-      // get id
-      var allDocs = await firestore.collection('videos').get();
-      int len = allDocs.docs.length;
-      String videoUrl = await _uploadVideoToStorage("Video $len", videoPath);
-      String thumbnail = await _uploadImageToStorage("Video $len", videoPath);
+      state = state.copyWith(isUploading: true);
 
+      String uid = _firebaseAuth.currentUser!.uid;
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(uid).get();
+
+      // Generate unique video ID
+      var allDocs = await _firestore.collection('videos').get();
+      int len = allDocs.docs.length;
+      String videoId = "Video $len";
+
+      // Upload video and thumbnail
+      String videoUrl = await _uploadVideoToStorage(videoId, videoPath);
+      String thumbnail = await _uploadImageToStorage(videoId, videoPath);
+
+      // Create video object
       Video video = Video(
         userName: (userDoc.data()! as Map<String, dynamic>)['name'],
         uid: uid,
-        id: "Video $len",
+        id: videoId,
         likes: [],
         commentCount: 0,
         shareCount: 0,
@@ -76,18 +96,20 @@ class UploadVideoController extends GetxController {
         profilePhoto: (userDoc.data()! as Map<String, dynamic>)['profileImage'],
         thumbnail: thumbnail,
       );
-      log(video.toJson().toString());
 
-      await firestore.collection('videos').doc('Video $len').set(
-            video.toJson(),
-          );
-      Get.back();
+      // Save to Firestore
+      await _firestore.collection('videos').doc(videoId).set(video.toJson());
+      log("Video uploaded successfully: ${video.toJson()}");
+
+      state = state.copyWith(isUploading: false);
     } catch (e) {
-      log(e.toString());
-      Get.snackbar(
-        'Error Uploading Video',
-        e.toString(),
-      );
+      log("Error uploading video: $e");
+      state = state.copyWith(isUploading: false, errorMessage: e.toString());
     }
   }
 }
+
+
+
+
+

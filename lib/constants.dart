@@ -16,8 +16,6 @@ var firebaseAuth = FirebaseAuth.instance;
 var firebaseStorage = FirebaseStorage.instance;
 var firestore = FirebaseFirestore.instance;
 
-//controller
-var authController = AuthController.instance;
 
 List pages = [
   VideoScreen(),

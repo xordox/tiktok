@@ -1,15 +1,15 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:video_player/video_player.dart';
 import 'package:tiktok/controllers/upload_video_controller.dart';
 import 'package:tiktok/views/widgets/text_input_field.dart';
-import 'package:video_player/video_player.dart';
 
-class ConfirmScreen extends StatefulWidget {
+class ConfirmScreen extends ConsumerStatefulWidget {
   final File videoFile;
   final String videoPath;
+
   const ConfirmScreen({
     super.key,
     required this.videoFile,
@@ -17,94 +17,121 @@ class ConfirmScreen extends StatefulWidget {
   });
 
   @override
-  State<ConfirmScreen> createState() => _ConfirmScreenState();
+  ConsumerState<ConfirmScreen> createState() => _ConfirmScreenState();
 }
 
-class _ConfirmScreenState extends State<ConfirmScreen> {
+class _ConfirmScreenState extends ConsumerState<ConfirmScreen> {
   late VideoPlayerController controller;
   final TextEditingController _songController = TextEditingController();
   final TextEditingController _captionController = TextEditingController();
 
-  final UploadVideoController _uploadVideoController =
-      Get.put(UploadVideoController());
-
   @override
   void initState() {
     super.initState();
-    setState(() {
-      controller = VideoPlayerController.file(widget.videoFile);
-    });
-    controller.initialize();
-    controller.play();
-    controller.setVolume(1);
-    controller.setLooping(true);
+    controller = VideoPlayerController.file(widget.videoFile)
+      ..initialize().then((_) {
+        setState(() {});
+        controller.play();
+        controller.setVolume(1);
+        controller.setLooping(true);
+      });
   }
 
   @override
   void dispose() {
-    super.dispose();
     controller.dispose();
+    _songController.dispose();
+    _captionController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final uploadState = ref.watch(uploadVideoProvider);
+
+    ref.listen(uploadVideoProvider, (_, state) {
+      if (state.isUploading == false && state.errorMessage == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Video uploaded successfully!")),
+        );
+        Navigator.pop(context); // Navigate back after successful upload
+      } else if (state.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${state.errorMessage}")),
+        );
+      }
+    });
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(
-              height: 30,
-            ),
+            const SizedBox(height: 30),
             SizedBox(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height / 1.5,
-              child: VideoPlayer(controller),
+              child: controller.value.isInitialized
+                  ? VideoPlayer(controller)
+                  : const Center(child: CircularProgressIndicator()),
             ),
-            const SizedBox(
-              height: 30,
+            const SizedBox(height: 30),
+            Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  width: MediaQuery.of(context).size.width - 20,
+                  child: TextInputField(
+                    textEditingController: _songController,
+                    labelText: "Song name",
+                    icon: Icons.music_note,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  width: MediaQuery.of(context).size.width - 20,
+                  child: TextInputField(
+                    textEditingController: _captionController,
+                    labelText: "Caption name",
+                    icon: Icons.closed_caption,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: uploadState.isUploading
+                      ? null
+                      : () {
+                          final songName = _songController.text.trim();
+                          final caption = _captionController.text.trim();
+                          final videoPath = widget.videoPath;
+
+                          if (songName.isEmpty || caption.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("Please fill all fields.")),
+                            );
+                            return;
+                          }
+
+                          ref
+                              .read(uploadVideoProvider.notifier)
+                              .uploadVideo(songName, caption, videoPath);
+                        },
+                  child: uploadState.isUploading
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : const Text(
+                          'Share',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                ),
+              ],
             ),
-            SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                    width: MediaQuery.of(context).size.width - 20,
-                    child: TextInputField(
-                        textEditingController: _songController,
-                        labelText: "Song name",
-                        icon: Icons.music_note),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                    width: MediaQuery.of(context).size.width - 20,
-                    child: TextInputField(
-                        textEditingController: _captionController,
-                        labelText: "Caption name",
-                        icon: Icons.closed_caption),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  ElevatedButton(
-                      onPressed: () => _uploadVideoController.uploadVideo(
-                          _songController.text,
-                          _captionController.text,
-                          widget.videoPath),
-                      child: const Text(
-                        'Share',
-                        style: TextStyle(color: Colors.white),
-                      ))
-                ],
-              ),
-            )
           ],
         ),
       ),
     );
   }
 }
+

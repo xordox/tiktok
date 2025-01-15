@@ -1,175 +1,205 @@
-import 'dart:async';
 import 'dart:developer';
-import 'dart:math' as Math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:isar/isar.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiktok/constants.dart';
+import 'package:tiktok/controllers/auth_controller.dart';
 import 'package:tiktok/controllers/comment_controller.dart';
-import 'package:tiktok/main.dart';
 import 'package:tiktok/models/video_comment.dart';
-import 'package:timeago/timeago.dart' as tago;
 
-class CommentScreen extends StatefulWidget {
+class CommentScreen extends ConsumerStatefulWidget {
   final String videoId;
 
   const CommentScreen({required this.videoId, super.key});
 
   @override
-  _CommentScreenState createState() => _CommentScreenState();
+  ConsumerState<CommentScreen> createState() => _CommentScreenState();
 }
 
-class _CommentScreenState extends State<CommentScreen> {
+class _CommentScreenState extends ConsumerState<CommentScreen> {
   final TextEditingController _controller = TextEditingController();
-  late Isar _isar;
   late String imgUrl;
   late String userName;
-  Timer? _botTimer;
+  bool isLoading = true;
+
   String botUrl =
       "https://media.istockphoto.com/id/2177271654/vector/illustration-of-robot-icon-in-flat-style-illustration-of-childrens-toy.jpg?s=2048x2048&w=is&k=20&c=QfEiKopoGW3xtjAqO6yCxUCHbCqdmebsNo7RSQpm7g4=";
-
-  // Resets the bot timer
-  void _resetBotTimer() {
-    _botTimer?.cancel(); // Cancel any existing timer
-    _botTimer =
-        Timer(const Duration(seconds: 5), _postBotComment); // Start a new timer
-  }
-
-  // Posts a bot comment
-  void _postBotComment() {
-    final botComments = [
-      "Great video!",
-      "This is so interesting!",
-      "Awesome content!",
-      "Keep it up!",
-      "Loved this part!",
-      "Can't wait for more!",
-    ];
-    final randomComment =
-        botComments[Math.Random().nextInt(botComments.length)];
-    _addComment(comment: randomComment, isBot: true);
-  }
 
   @override
   void initState() {
     super.initState();
-    _isar = isar;
     getUserProfileDetails();
-    _getCommentsForVideo();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _botTimer?.cancel();
-    super.dispose();
+    ref.read(commentControllerProvider.notifier).fetchComments(widget.videoId);
   }
 
   getUserProfileDetails() async {
-    DocumentSnapshot userDoc =
-        await firestore.collection('users').doc(authController.user.uid).get();
-    imgUrl = (userDoc.data()! as dynamic)['profileImage'];
-    userName = (userDoc.data()! as dynamic)['name'];
+    DocumentSnapshot userDoc = await firestore
+        .collection('users')
+        .doc(firebaseAuth.currentUser!.uid)
+        .get();
+    setState(() {
+      imgUrl = (userDoc.data()! as dynamic)['profileImage'];
+      userName = (userDoc.data()! as dynamic)['name'];
+      isLoading = false;
+    });
 
     log("imgUrl: $imgUrl ");
     log(" userName: $userName");
   }
 
-  Future<void> _addComment(
-      {required String comment, bool isBot = false}) async {
-    log("before adding");
-    final newComment = VideoComment(
-      videoId: widget.videoId,
-      username: isBot ? "Bot" : userName,
-      comment: comment,
-      timestamp: DateTime.now(),
-      imageUrl: isBot ? botUrl : imgUrl,
-    );
-    log("after adding");
-
-    await _isar.writeTxn(() async {
-      final id = await _isar.videoComments.put(newComment);
-      log("Comment added with ID: $id");
-    });
-
-    _controller.clear();
-    _resetBotTimer(); // Reset the timer whenever a comment is added
-    setState(() {});
-  }
-
-  Future<List<VideoComment>> _getCommentsForVideo() async {
-    final comments = await _isar.videoComments
-        .filter()
-        .videoIdEqualTo(widget.videoId)
-        .findAll();
-
-    log("Comments fetched: ${comments.length}");
-    return comments;
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final comments = ref.watch(commentControllerProvider);
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Comments")),
-      body: Column(
-        children: [
-          Expanded(
-            child: FutureBuilder<List<VideoComment>>(
-              future: _getCommentsForVideo(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("No comments yet!"));
-                }
-
-                final comments = snapshot.data!;
-                return ListView.builder(
-                  itemCount: comments.length,
-                  itemBuilder: (context, index) {
-                    final comment = comments[index];
-                    return ListTile(
-                      title: Text(comment.username),
-                      subtitle: Text(comment.comment),
-                      trailing: Text(
-                        "${comment.timestamp.hour}:${comment.timestamp.minute}",
+      backgroundColor: Colors.transparent,
+      body: ClipRRect(
+        clipBehavior: Clip.hardEdge,
+        borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(30.0), topRight: (Radius.circular(30.0))),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 40,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox.shrink(),
+                  Text(
+                    "${comments.length} comments",
+                    style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: InkWell(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Icon(
+                        Icons.clear,
+                        size: 25,
+                        color: Colors.grey[700],
                       ),
-                    );
-                  },
-                );
-              },
+                    ),
+                  )
+                ],
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: const InputDecoration(
-                      labelText: "Add a comment...",
-                      border: OutlineInputBorder(),
+            Expanded(
+              child: comments.isEmpty
+                  ? const Center(child: Text("No comments yet!"))
+                  : ListView.builder(
+                      itemCount: comments.length,
+                      itemBuilder: (context, index) {
+                        final VideoComment comment = comments[index];
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundImage: NetworkImage(comment.imageUrl),
+                          ),
+                          title: Text(
+                            comment.username,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.grey),
+                          ),
+                          subtitle: Text(
+                            comment.comment,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.black),
+                          ),
+                          trailing: Text(
+                            "${comment.timestamp.hour}:${comment.timestamp.minute}",
+                          ),
+                        );
+                      },
+                    ),
+            ),
+            Divider(
+              color: Colors.grey[300],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: isLoading
+                        ? const CircleAvatar(
+                            backgroundColor: Colors.white,
+                            radius: 20,
+                          )
+                        : CircleAvatar(
+                            backgroundImage: NetworkImage(imgUrl),
+                            radius: 20,
+                          ),
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    clipBehavior: Clip.hardEdge,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _controller,
+                            style: const TextStyle(
+                              color: Colors.black,
+                            ),
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 10.0, // Align text vertically
+                                horizontal: 15.0,
+                              ),
+                              hintText: "Add comment...",
+                              hintStyle: TextStyle(
+                                color: Colors.black54,
+                              ),
+                              border: InputBorder.none, // Remove default border
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.send,
+                            color: Colors.black,
+                          ),
+                          onPressed: () {
+                            if (_controller.text.trim().isNotEmpty) {
+                              ref
+                                  .read(commentControllerProvider.notifier)
+                                  .addComment(
+                                    videoId: widget.videoId,
+                                    username: userName,
+                                    comment: _controller.text.trim(),
+                                    imageUrl: imgUrl,
+                                  );
+                              _controller.clear();
+                            }
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: () {
-                    if (_controller.text.trim().isNotEmpty) {
-                      _addComment(comment: _controller.text.trim());
-                    }
-                  },
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
