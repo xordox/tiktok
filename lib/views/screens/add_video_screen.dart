@@ -13,7 +13,8 @@ class AddVideoScreen extends ConsumerWidget {
   const AddVideoScreen({super.key});
 
   // Function to pick video
-  Future<void> pickVideo(ImageSource src, BuildContext context, WidgetRef ref) async {
+  Future<void> pickVideo(
+      ImageSource src, BuildContext context, WidgetRef ref) async {
     final video = await ImagePicker().pickVideo(source: src);
     if (video != null) {
       // Updating the video file state using Riverpod
@@ -97,7 +98,8 @@ class AddVideoScreen extends ConsumerWidget {
       body: Center(
         child: InkWell(
           onTap: () {
-            showOptionsDialog(context, ref); // Pass the `ref` to showOptionsDialog
+            showOptionsDialog(
+                context, ref); // Pass the `ref` to showOptionsDialog
           },
           child: Container(
             width: 190,
@@ -111,7 +113,7 @@ class AddVideoScreen extends ConsumerWidget {
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
-                    color: Colors.black),
+                    color: Colors.white),
               ),
             ),
           ),
@@ -120,4 +122,3 @@ class AddVideoScreen extends ConsumerWidget {
     );
   }
 }
-

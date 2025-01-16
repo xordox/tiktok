@@ -54,7 +54,7 @@ class _ConfirmScreenState extends ConsumerState<ConfirmScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Video uploaded successfully!")),
         );
-        Navigator.pop(context); // Navigate back after successful upload
+        Navigator.pop(context); 
       } else if (state.errorMessage != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error: ${state.errorMessage}")),

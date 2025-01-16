@@ -73,30 +73,36 @@ class ProfileScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: null,
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black,
                     backgroundColor: Colors.grey.shade200,
+                    disabledForegroundColor: Colors.black45,
+                    disabledBackgroundColor: Colors.grey.shade100,
                   ),
                   child: const Text('Edit Profile'),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: null,
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black,
                     backgroundColor: Colors.grey.shade200,
+                    disabledForegroundColor: Colors.black45,
+                    disabledBackgroundColor: Colors.grey.shade100,
                   ),
                   child: const Text('Share Profile'),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    authController.logoutUser(context);
+                  },
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black,
                     backgroundColor: Colors.grey.shade200,
                   ),
-                  child: const Icon(Icons.person_add_alt),
+                  child: const Icon(Icons.logout),
                 ),
               ],
             ),

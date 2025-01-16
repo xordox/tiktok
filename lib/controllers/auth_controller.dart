@@ -50,7 +50,7 @@ class AuthController extends StateNotifier<User?> {
       if (user == null) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => LoginScreen()),
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
           (route) => false,
         );
       } else {
@@ -160,92 +160,78 @@ class AuthController extends StateNotifier<User?> {
   }
 
   Future<void> loginUser(
-  BuildContext context,
-  String email,
-  String password,
-  Function onSuccess, // Add the callback parameter
-) async {
-  try {
-    if (email.isNotEmpty && password.isNotEmpty) {
-      log("Before signInWithEmailAndPassword");
-      await firebaseAuth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      log("After signInWithEmailAndPassword: ${firebaseAuth.currentUser?.uid}");
+    BuildContext context,
+    String email,
+    String password,
+    Function onSuccess, // Add the callback parameter
+  ) async {
+    try {
+      if (email.isNotEmpty && password.isNotEmpty) {
+        log("Before signInWithEmailAndPassword");
+        await firebaseAuth.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+        log("After signInWithEmailAndPassword: ${firebaseAuth.currentUser?.uid}");
 
-      // Re-fetch the current user after login
-      final currentUser = firebaseAuth.currentUser;
-      if (currentUser == null) {
-        throw Exception("Failed to retrieve user after login");
+        // Re-fetch the current user after login
+        final currentUser = firebaseAuth.currentUser;
+        if (currentUser == null) {
+          throw Exception("Failed to retrieve user after login");
+        }
+
+        log("Login successful");
+        await fetchUserDetails(currentUser.uid);
+
+        // Call the onSuccess callback and pass the context
+        onSuccess();
+      } else {
+        ref.read(snackbarProvider).show(
+              context,
+              "Error Login User",
+              'Please enter all the fields',
+            );
       }
-
-      log("Login successful");
-      await fetchUserDetails(currentUser.uid);
-
-      // Call the onSuccess callback and pass the context
-      onSuccess();
-    } else {
+    } catch (e) {
       ref.read(snackbarProvider).show(
             context,
             "Error Login User",
-            'Please enter all the fields',
+            e.toString(),
           );
     }
-  } catch (e) {
-    ref.read(snackbarProvider).show(
-          context,
-          "Error Login User",
-          e.toString(),
-        );
   }
-}
 
-
-  // Future<void> loginUser(
-  //     BuildContext context, String email, String password) async {
-  //   try {
-  //     if (email.isNotEmpty && password.isNotEmpty) {
-  //       log("Before signInWithEmailAndPassword");
-  //       await firebaseAuth.signInWithEmailAndPassword(
-  //         email: email,
-  //         password: password,
-  //       );
-  //       log("After signInWithEmailAndPassword: ${firebaseAuth.currentUser?.uid}");
-
-  //       // Re-fetch the current user after login
-  //       final currentUser = firebaseAuth.currentUser;
-  //       if (currentUser == null) {
-  //         throw Exception("Failed to retrieve user after login");
-  //       }
-
-  //       log("Login successful");
-  //       await fetchUserDetails(currentUser.uid);
-
-  //       _navigateToHome(context); 
-  //     } else {
-  //       ref.read(snackbarProvider).show(
-  //             context,
-  //             "Error Login User",
-  //             'Please enter all the fields',
-  //           );
-  //     }
-  //   } catch (e) {
-  //     ref.read(snackbarProvider).show(
-  //           context,
-  //           "Error Login User",
-  //           e.toString(),
-  //         );
-  //   }
-  // }
+  Future<void> logoutUser(BuildContext context) async {
+    try {
+      await firebaseAuth.signOut();
+      // Optionally, navigate to the login screen after logout
+      _navigateToLogin(context);
+    } catch (e) {
+      // Handle any errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error logging out: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   void _navigateToHome(BuildContext context) {
-  Navigator.pushAndRemoveUntil(
-    context,
-    MaterialPageRoute(builder: (_) => const HomeScreen()),
-    (route) => false,
-  );
-}
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      (route) => false,
+    );
+  }
+
+  void _navigateToLogin(BuildContext context) {
+    final navigatorKey = Navigator.of(context);
+    navigatorKey.pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
+  }
 }
 
 final navigatorKeyProvider = Provider<GlobalKey<NavigatorState>>((ref) {

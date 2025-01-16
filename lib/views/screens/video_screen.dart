@@ -54,6 +54,7 @@ class VideoScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final videoList = ref.watch(videoControllerProvider);
+    final comments = ref.watch(commentControllerProvider);
 
     return Scaffold(
         body: Stack(children: [
@@ -66,7 +67,9 @@ class VideoScreen extends ConsumerWidget {
               itemCount: videoList.length,
               controller: PageController(initialPage: 0, viewportFraction: 1),
               itemBuilder: (context, index) {
-                final comments = ref.watch(commentControllerProvider);
+                ref
+                    .read(commentControllerProvider.notifier)
+                    .fetchComments(videoList[index].id);
                 final data = videoList[index];
                 return Stack(
                   children: [
