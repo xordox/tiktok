@@ -35,6 +35,7 @@ dependencies:
   firebase_storage: ^12.4.0
   flutter:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.2
   flutter_riverpod: ^2.6.1
   flutter_svg: ^2.0.17
   get: ^4.6.6
@@ -53,6 +54,12 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   isar_generator: ^3.1.0+1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/tiktok.jpg"
+  min_sdk_android: 21
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

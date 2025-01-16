@@ -50,7 +50,7 @@ class MyApp extends ConsumerWidget {
     final isar = ref.watch(isarProvider);
 
     // // Get the global navigator key
-     final navigatorKey = ref.read(navigatorKeyProvider);
+    final navigatorKey = ref.read(navigatorKeyProvider);
 
     return isar.when(
       data: (isarInstance) {
@@ -65,6 +65,7 @@ class MyApp extends ConsumerWidget {
         );
       },
       loading: () => const MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: Scaffold(
           body: Center(child: CircularProgressIndicator()),
         ),
@@ -87,15 +88,9 @@ class AuthChecker extends ConsumerWidget {
     final user = ref.watch(authControllerProvider);
 
     if (user == null) {
-      return LoginScreen();
+      return const LoginScreen();
     } else {
       return const HomeScreen();
     }
   }
 }
-
-
-
-
-
-
