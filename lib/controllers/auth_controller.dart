@@ -18,6 +18,8 @@ final authControllerProvider =
   return AuthController(ref);
 });
 
+final isLoadingProvider = StateProvider<bool>((ref) => false);
+
 class AuthController extends StateNotifier<User?> {
   final Ref ref;
 
@@ -106,59 +108,55 @@ class AuthController extends StateNotifier<User?> {
   }
 
   Future<bool> registerUser(BuildContext context, String username, String email,
-      String password, File? image) async {
-    bool isRegistered = false;
-    try {
-      if (username.isEmpty ||
-          email.isEmpty ||
-          password.isEmpty ||
-          image == null) {
-        ref.read(snackbarProvider).show(
-              context,
-              "Error Register User",
-              "Please enter all the fields",
-            );
-        return false;
-      }
+    String password, File? image) async {
+  final isLoading = ref.read(isLoadingProvider.notifier);
+  isLoading.state = true; // Start loading
 
-      // Create user
-      UserCredential userCredential = await firebaseAuth
-          .createUserWithEmailAndPassword(email: email, password: password);
-
-      // Upload profile image
-      String downloadUrl = await _uploadToStorage(image);
-
-      // Create user model
-      model.User user = model.User(
-        name: username,
-        email: email,
-        password: password,
-        profileImage: downloadUrl,
-        uid: userCredential.user!.uid,
-      );
-
-      // Save user data in Firestore
-      await firestore
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .set(user.toJson());
-
-      log("User registered successfully: ${user.name}");
-      ref.read(snackbarProvider).show(
-            context,
-            "Success",
-            "User registered successfully",
-          );
-      return true;
-    } catch (e) {
+  try {
+    if (username.isEmpty || email.isEmpty || password.isEmpty || image == null) {
       ref.read(snackbarProvider).show(
             context,
             "Error Register User",
-            e.toString(),
+            "Please enter all the fields",
           );
       return false;
     }
+
+    UserCredential userCredential = await firebaseAuth
+        .createUserWithEmailAndPassword(email: email, password: password);
+
+    String downloadUrl = await _uploadToStorage(image);
+
+    model.User user = model.User(
+      name: username,
+      email: email,
+      password: password,
+      profileImage: downloadUrl,
+      uid: userCredential.user!.uid,
+    );
+
+    await firestore.collection('users').doc(userCredential.user!.uid).set(user.toJson());
+
+    log("User registered successfully: ${user.name}");
+    ref.read(snackbarProvider).show(
+          context,
+          "Success",
+          "User registered successfully",
+        );
+
+    return true;
+  } catch (e) {
+    ref.read(snackbarProvider).show(
+          context,
+          "Error Register User",
+          e.toString(),
+        );
+    return false;
+  } finally {
+    isLoading.state = false; // Stop loading
   }
+}
+
 
   Future<void> signInWithGoogle(BuildContext context) async {
     try {
@@ -205,48 +203,51 @@ class AuthController extends StateNotifier<User?> {
     BuildContext context,
     String email,
     String password,
-    Function onSuccess, // Add the callback parameter
+    Function onSuccess,
   ) async {
+    final isLoading = ref.read(isLoadingProvider.notifier);
+
     try {
-      if (email.isNotEmpty && password.isNotEmpty) {
-        log("Before signInWithEmailAndPassword");
-        await firebaseAuth.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-        log("After signInWithEmailAndPassword: ${firebaseAuth.currentUser?.uid}");
-
-        // Re-fetch the current user after login
-        final currentUser = firebaseAuth.currentUser;
-        if (currentUser == null) {
-          throw Exception("Failed to retrieve user after login");
-        }
-
-        log("Login successful");
-        await fetchUserDetails(currentUser.uid);
-
-        // Call the onSuccess callback and pass the context
-        onSuccess();
-      } else {
+      if (email.isEmpty || password.isEmpty) {
         ref.read(snackbarProvider).show(
               context,
               "Error Login User",
               'Please enter all the fields',
             );
+        return;
       }
+
+      isLoading.state = true; // Set loading state to true
+
+      await firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final currentUser = firebaseAuth.currentUser;
+      if (currentUser == null) {
+        throw Exception("Failed to retrieve user after login");
+      }
+
+      await fetchUserDetails(currentUser.uid);
+
+      onSuccess();
     } catch (e) {
       ref.read(snackbarProvider).show(
             context,
             "Error Login User",
             e.toString(),
           );
+    } finally {
+      isLoading.state = false; // Reset loading state
     }
   }
+
 
   Future<void> logoutUser(BuildContext context) async {
     try {
       await firebaseAuth.signOut();
-      // Optionally, navigate to the login screen after logout
+      // navigate to the login screen after logout
       _navigateToLogin(context);
     } catch (e) {
       // Handle any errors

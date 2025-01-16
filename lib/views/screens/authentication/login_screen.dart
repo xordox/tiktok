@@ -20,6 +20,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authController = ref.read(authControllerProvider.notifier);
+    final isLoading = ref.watch(isLoadingProvider); // Watch the loading state
 
     return Scaffold(
       body: SafeArea(
@@ -76,56 +77,64 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       borderRadius: const BorderRadius.all(Radius.circular(5)),
                     ),
                     child: InkWell(
-                      onTap: () {
-                        final email = _emailController.text.trim();
-                        final password = _passwordController.text.trim();
+                      onTap: isLoading
+                          ? null
+                          : () {
+                              final email = _emailController.text.trim();
+                              final password = _passwordController.text.trim();
 
-                        if (email.isEmpty || password.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                email.isEmpty
-                                    ? 'Please enter your email.'
-                                    : 'Please enter your password.',
-                              ),
-                              backgroundColor: Colors.red,
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        } else {
-                          authController.loginUser(
-                            context,
-                            email,
-                            password,
-                            () {
-                              if (mounted) {
-                                Navigator.pushAndRemoveUntil(
+                              if (email.isEmpty || password.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      email.isEmpty
+                                          ? 'Please enter your email.'
+                                          : 'Please enter your password.',
+                                    ),
+                                    backgroundColor: Colors.red,
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              } else {
+                                authController.loginUser(
                                   context,
-                                  MaterialPageRoute(
-                                      builder: (_) => const HomeScreen()),
-                                  (route) => false,
+                                  email,
+                                  password,
+                                  () {
+                                    if (mounted) {
+                                      Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) => const HomeScreen()),
+                                        (route) => false,
+                                      );
+                                    }
+                                  },
                                 );
                               }
                             },
-                          );
-                        }
-                      },
-                      child: const Center(
-                        child: Text(
-                          "Login",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
+                      child: Center(
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : const Text(
+                                "Login",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
                   TextButton.icon(
-                    onPressed: () async {
-                      await authController.signInWithGoogle(context);
-                    },
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            await authController.signInWithGoogle(context);
+                          },
                     icon: const Icon(Icons.login, color: Colors.blue),
                     label: const Text(
                       "Sign in with Google",
