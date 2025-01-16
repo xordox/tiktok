@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tiktok/constants.dart';
 import 'package:tiktok/models/user.dart' as model;
@@ -156,6 +157,47 @@ class AuthController extends StateNotifier<User?> {
             e.toString(),
           );
       return false;
+    }
+  }
+
+  Future<void> signInWithGoogle(BuildContext context) async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      UserCredential userCredential =
+          await firebaseAuth.signInWithCredential(credential);
+      User? user = userCredential.user;
+
+      if (user != null) {
+        final doc = await firestore.collection('users').doc(user.uid).get();
+        if (!doc.exists) {
+          model.User newUser = model.User(
+            name: user.displayName ?? "Anonymous",
+            email: user.email ?? "",
+            profileImage: user.photoURL ?? "",
+            password: "",
+            uid: user.uid,
+          );
+          await firestore
+              .collection('users')
+              .doc(user.uid)
+              .set(newUser.toJson());
+        }
+        fetchUserDetails(user.uid);
+      }
+    } catch (e) {
+      log(e.toString());
+      ref.read(snackbarProvider).show(
+            context,
+            "Error Login Google",
+            e.toString(),
+          );
     }
   }
 

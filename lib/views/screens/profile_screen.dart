@@ -33,13 +33,16 @@ class ProfileScreen extends ConsumerWidget {
               backgroundColor: Colors.blue,
               child: CircleAvatar(
                 radius: 38,
-                backgroundImage:
-                    NetworkImage(authController.currentUser!.profileImage),
+                backgroundImage: authController.currentUser?.profileImage !=
+                            null &&
+                        authController.currentUser!.profileImage.isNotEmpty
+                    ? NetworkImage(authController.currentUser!.profileImage)
+                    : const AssetImage('assets/tiktok.jpg') as ImageProvider,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              authController.currentUser!.email,
+              authController.currentUser?.email ?? "",
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),

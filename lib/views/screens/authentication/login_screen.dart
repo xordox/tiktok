@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiktok/constants.dart';
@@ -83,7 +81,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         final password = _passwordController.text.trim();
 
                         if (email.isEmpty || password.isEmpty) {
-                          // Display a snackbar if email or password is empty
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
@@ -124,6 +121,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 20),
+                  TextButton.icon(
+                    onPressed: () async {
+                      await authController.signInWithGoogle(context);
+                    },
+                    icon: const Icon(Icons.login, color: Colors.blue),
+                    label: const Text(
+                      "Sign in with Google",
+                      style: TextStyle(fontSize: 18, color: Colors.blue),
+                    ),
+                  ),
                   const SizedBox(height: 25),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -154,6 +162,3 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 }
-
-
-
