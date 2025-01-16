@@ -23,7 +23,7 @@ final isarProvider = FutureProvider<Isar>((ref) async {
   return await Isar.open([VideoCommentSchema], directory: dir.path);
 });
 
-// Navigator key provider
+// // Navigator key provider
 final navigatorKeyProvider = Provider<GlobalKey<NavigatorState>>((ref) {
   return GlobalKey<NavigatorState>();
 });
@@ -49,8 +49,8 @@ class MyApp extends ConsumerWidget {
     // Ensure Isar initialization
     final isar = ref.watch(isarProvider);
 
-    // Get the global navigator key
-    final navigatorKey = ref.read(navigatorKeyProvider);
+    // // Get the global navigator key
+     final navigatorKey = ref.read(navigatorKeyProvider);
 
     return isar.when(
       data: (isarInstance) {

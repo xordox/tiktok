@@ -20,45 +20,46 @@ class HomeScreen extends ConsumerWidget {
           // Update the page index in the provider
           ref.read(pageIndexProvider.notifier).state = index;
         },
-        backgroundColor: backgroundColor,
+        backgroundColor: Colors.transparent,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.red,
+        selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white,
         currentIndex: pageIndex,
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(
-              Icons.home,
+              pageIndex == 0 ? Icons.home : Icons.home_outlined,
               size: 30,
             ),
             label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: "Search",
+            icon: Icon(
+              pageIndex == 1 ? Icons.people : Icons.people_alt_outlined,
+            ),
+            label: "Friends",
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: CustomIcon(),
             label: "",
           ),
           BottomNavigationBarItem(
             icon: Icon(
-              Icons.message,
+              pageIndex == 3 ? Icons.message : Icons.message_outlined,
               size: 30,
             ),
             label: "Messages",
           ),
           BottomNavigationBarItem(
             icon: Icon(
-              Icons.person,
+              pageIndex == 4 ? Icons.person : Icons.person_outline,
               size: 30,
             ),
             label: "Profile",
           ),
         ],
       ),
-      body: pages[pageIndex], // Display the appropriate page
+      body: pages[pageIndex],
     );
   }
 }
-

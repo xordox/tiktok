@@ -38,8 +38,6 @@ class User {
     );
   }
 
-  // String toJson() => json.encode(toMap());
-
   Map<String, dynamic> toJson() => {
         'name': name,
         'profileImage': profileImage,
@@ -49,14 +47,13 @@ class User {
       };
 
   static User fromSnap(DocumentSnapshot snap) {
-    var snapshot = snap.data() as Map<String, dynamic>;
+    final snapshot = snap.data() as Map<String, dynamic>;
     return User(
-      email: snapshot['email'],
-      password: snapshot['password'],
-      profileImage: snapshot['profileImage'],
-      uid: snapshot['uid'],
-      name: snapshot['name'],
+      name: snapshot['name'] as String,
+      profileImage: snapshot['profileImage'] as String,
+      email: snapshot['email'] as String,
+      password: snapshot['password'] as String,
+      uid: snapshot['uid'] as String,
     );
   }
-
 }

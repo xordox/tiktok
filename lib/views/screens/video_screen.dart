@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:tiktok/constants.dart';
 import 'package:tiktok/controllers/auth_controller.dart';
+import 'package:tiktok/controllers/comment_controller.dart';
 import 'package:tiktok/controllers/video_controller.dart';
 import 'package:tiktok/views/screens/comments_screen.dart';
+import 'package:tiktok/views/screens/search_screen.dart';
 import 'package:tiktok/views/widgets/circle_animation.dart';
+import 'package:tiktok/views/widgets/tabs.dart';
 import 'package:tiktok/views/widgets/video_player_item.dart';
 
 class VideoScreen extends ConsumerWidget {
@@ -26,54 +30,23 @@ class VideoScreen extends ConsumerWidget {
   }
 
   Widget buildProfile(String profilePhoto) {
-    return SizedBox(
-      width: 60,
-      height: 60,
-      child: Stack(
-        children: [
-          Positioned(
-            left: 5,
-            child: Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(25)),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(25),
-                child: Image.network(
-                  profilePhoto,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          )
-        ],
+    return CircleAvatar(
+      radius: 25,
+      backgroundColor: Colors.white,
+      child: CircleAvatar(
+        radius: 23,
+        backgroundImage: NetworkImage(profilePhoto),
       ),
     );
   }
 
   Widget buildMusicAlbum(String profilePhoto) {
-    return SizedBox(
-      width: 60,
-      height: 60,
-      child: Container(
-        padding: const EdgeInsets.all(11),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [
-              Colors.grey,
-              Colors.white,
-            ],
-          ),
-          borderRadius: BorderRadius.circular(25),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(25),
-          child: Image.network(
-            profilePhoto,
-            fit: BoxFit.cover,
-          ),
-        ),
+    return CircleAvatar(
+      radius: 40,
+      backgroundColor: Colors.blue,
+      child: CircleAvatar(
+        radius: 38,
+        backgroundImage: NetworkImage(profilePhoto),
       ),
     );
   }
@@ -83,7 +56,8 @@ class VideoScreen extends ConsumerWidget {
     final videoList = ref.watch(videoControllerProvider);
 
     return Scaffold(
-      body: videoList.isEmpty
+        body: Stack(children: [
+      videoList.isEmpty
           ? const Center(
               child: CircularProgressIndicator(),
             )
@@ -92,6 +66,7 @@ class VideoScreen extends ConsumerWidget {
               itemCount: videoList.length,
               controller: PageController(initialPage: 0, viewportFraction: 1),
               itemBuilder: (context, index) {
+                final comments = ref.watch(commentControllerProvider);
                 final data = videoList[index];
                 return Stack(
                   children: [
@@ -168,7 +143,7 @@ class VideoScreen extends ConsumerWidget {
                                               .likeVideo(data.id),
                                           child: Icon(
                                             Icons.favorite,
-                                            size: 40,
+                                            size: 30,
                                             color: data.likes.contains(ref
                                                     .read(
                                                         authControllerProvider)!
@@ -189,16 +164,17 @@ class VideoScreen extends ConsumerWidget {
                                         InkWell(
                                           onTap: () => _showModalBottomSheet(
                                               context, data.id),
-                                          child: const Icon(
-                                            Icons.comment,
-                                            size: 40,
+                                          child: SvgPicture.asset(
+                                            "assets/svg/message.svg",
                                             color: Colors.white,
+                                            width: 25,
+                                            height: 25,
                                           ),
                                         ),
                                         const SizedBox(height: 7),
-                                        const Text(
-                                          "2", // Replace with actual comment count
-                                          style: TextStyle(
+                                        Text(
+                                          comments.length.toString(),
+                                          style: const TextStyle(
                                             fontSize: 20,
                                             color: Colors.white,
                                           ),
@@ -208,18 +184,11 @@ class VideoScreen extends ConsumerWidget {
                                           onTap: () => Share.shareUri(
                                             Uri.parse(data.videoUrl),
                                           ),
-                                          child: const Icon(
-                                            Icons.share,
-                                            size: 40,
+                                          child: SvgPicture.asset(
+                                            "assets/svg/share.svg",
                                             color: Colors.white,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 7),
-                                        const Text(
-                                          "4",
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            color: Colors.white,
+                                            width: 25,
+                                            height: 25,
                                           ),
                                         ),
                                         const SizedBox(height: 7),
@@ -241,7 +210,31 @@ class VideoScreen extends ConsumerWidget {
                 );
               },
             ),
-    );
+      Positioned(
+          top: 10,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            width: MediaQuery.of(context).size.width,
+            height: 35,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Image.asset("assets/live_icon.png"),
+                const Tabs(),
+                InkWell(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const SearchScreen()),
+                  ),
+                  child: const Icon(
+                    Icons.search,
+                    size: 30,
+                  ),
+                )
+              ],
+            ),
+          ))
+    ]));
   }
 }
-
