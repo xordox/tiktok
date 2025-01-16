@@ -23,9 +23,6 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
   late String userName;
   bool isLoading = true;
 
-  String botUrl =
-      "https://media.istockphoto.com/id/2177271654/vector/illustration-of-robot-icon-in-flat-style-illustration-of-childrens-toy.jpg?s=2048x2048&w=is&k=20&c=QfEiKopoGW3xtjAqO6yCxUCHbCqdmebsNo7RSQpm7g4=";
-
   @override
   void initState() {
     super.initState();
@@ -103,6 +100,7 @@ class _CommentScreenState extends ConsumerState<CommentScreen> {
                         return ListTile(
                           leading: CircleAvatar(
                             backgroundImage: NetworkImage(comment.imageUrl),
+                            backgroundColor: Colors.grey[300],
                           ),
                           title: Text(
                             comment.username,

@@ -106,6 +106,18 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
           ),
         ),
+        if (!isPlaying)
+          const Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            top: 0,
+            child: Icon(
+              Icons.play_arrow,
+              size: 80,
+              color: Colors.white38,
+            ),
+          ),
       ],
     );
   }

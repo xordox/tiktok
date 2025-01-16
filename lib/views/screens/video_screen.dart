@@ -41,13 +41,9 @@ class VideoScreen extends ConsumerWidget {
   }
 
   Widget buildMusicAlbum(String profilePhoto) {
-    return CircleAvatar(
-      radius: 40,
-      backgroundColor: Colors.blue,
-      child: CircleAvatar(
-        radius: 38,
-        backgroundImage: NetworkImage(profilePhoto),
-      ),
+    return const CircleAvatar(
+      radius: 23,
+      backgroundImage: AssetImage("assets/music.png"),
     );
   }
 
@@ -128,7 +124,7 @@ class VideoScreen extends ConsumerWidget {
                                 ),
                               ),
                               Container(
-                                width: 100,
+                                width: 80,
                                 margin: EdgeInsets.only(
                                     top:
                                         MediaQuery.of(context).size.height / 5),
@@ -159,9 +155,9 @@ class VideoScreen extends ConsumerWidget {
                                         Text(
                                           data.likes.length.toString(),
                                           style: const TextStyle(
-                                            fontSize: 20,
-                                            color: Colors.white,
-                                          ),
+                                              fontSize: 12,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500),
                                         ),
                                         const SizedBox(height: 7),
                                         InkWell(
@@ -178,9 +174,9 @@ class VideoScreen extends ConsumerWidget {
                                         Text(
                                           comments.length.toString(),
                                           style: const TextStyle(
-                                            fontSize: 20,
-                                            color: Colors.white,
-                                          ),
+                                              fontSize: 12,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500),
                                         ),
                                         const SizedBox(height: 7),
                                         InkWell(
@@ -195,10 +191,15 @@ class VideoScreen extends ConsumerWidget {
                                           ),
                                         ),
                                         const SizedBox(height: 7),
-                                        CircleAnimation(
-                                          child: buildMusicAlbum(
-                                              data.profilePhoto),
+                                        const Text(
+                                          "Share",
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w500),
                                         ),
+                                        const SizedBox(height: 7),
+                                        buildMusicAlbum(data.profilePhoto),
                                       ],
                                     ),
                                   ],

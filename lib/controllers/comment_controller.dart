@@ -20,16 +20,16 @@ final commentControllerProvider =
 class CommentController extends StateNotifier<List<VideoComment>> {
   final Isar? isar;
   Timer? _botTimer;
+  String botUrl =
+      "https://cdn.pixabay.com/photo/2017/01/31/17/43/android-2025857_1280.png";
 
   CommentController(this.isar) : super([]);
 
   // Fetch comments for a video
   Future<void> fetchComments(String videoId) async {
     if (isar == null) return;
-    final comments = await isar!.videoComments
-        .filter()
-        .videoIdEqualTo(videoId)
-        .findAll();
+    final comments =
+        await isar!.videoComments.filter().videoIdEqualTo(videoId).findAll();
     state = comments;
     log("Fetched ${comments.length} comments for video $videoId");
   }
@@ -48,7 +48,7 @@ class CommentController extends StateNotifier<List<VideoComment>> {
       username: isBot ? "Bot" : username,
       comment: comment,
       timestamp: DateTime.now(),
-      imageUrl: isBot ? "botUrl" : imageUrl,
+      imageUrl: isBot ? botUrl : imageUrl,
     );
 
     await isar!.writeTxn(() async {
@@ -80,7 +80,7 @@ class CommentController extends StateNotifier<List<VideoComment>> {
         videoId: videoId,
         username: "Bot",
         comment: randomComment,
-        imageUrl: "botUrl",
+        imageUrl: botUrl,
         isBot: true,
       );
     });
@@ -92,7 +92,3 @@ class CommentController extends StateNotifier<List<VideoComment>> {
     super.dispose();
   }
 }
-
-
-
-
