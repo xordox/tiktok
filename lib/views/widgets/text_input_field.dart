@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tiktok/constatns.dart';
+import 'package:tiktok/constants.dart';
 
 class TextInputField extends StatelessWidget {
   final TextEditingController textEditingController;
@@ -7,7 +7,12 @@ class TextInputField extends StatelessWidget {
   final bool isObscure;
   final IconData icon;
 
-  const TextInputField(Key? key, this.textEditingController, this.labelText, this.isObscure, this.icon): super(key: key);
+  const TextInputField(
+      {super.key,
+      required this.textEditingController,
+      required this.labelText,
+      this.isObscure = false,
+      required this.icon});
 
   @override
   Widget build(BuildContext context) {
