@@ -24,7 +24,17 @@ class SearchScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'work in progress',
+                  ),
+                  backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
             child: const Text(
               'Search',
               style: TextStyle(color: Colors.red, fontSize: 16),
@@ -70,8 +80,8 @@ class SearchScreen extends StatelessWidget {
                     title: '16 Missed Calls',
                     isHighlighted: true,
                   ),
-                  SuggestionItem(title: 'xxl bed'),
-                  SuggestionItem(title: '16 missed calls'),
+                  SuggestionItem(title: 'LA wildfire'),
+                  SuggestionItem(title: 'space x'),
                   SuggestionItem(
                     title: 'd letter signature',
                     subtitle: 'Just watched',

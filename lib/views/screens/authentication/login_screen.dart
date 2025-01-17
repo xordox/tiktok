@@ -129,16 +129,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  TextButton.icon(
-                    onPressed: isLoading
-                        ? null
-                        : () async {
-                            await authController.signInWithGoogle(context);
-                          },
-                    icon: const Icon(Icons.login, color: Colors.blue),
-                    label: const Text(
-                      "Sign in with Google",
-                      style: TextStyle(fontSize: 18, color: Colors.blue),
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: buttonColor,
+                      borderRadius: const BorderRadius.all(Radius.circular(5)),
+                    ),
+                    child: InkWell(
+                      onTap: isLoading
+                          ? null
+                          : () async {
+                              await authController.signInWithGoogle(
+                                context,
+                                () {
+                                  if (mounted) {
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) => const HomeScreen()),
+                                      (route) => false,
+                                    );
+                                  }
+                                },
+                              );
+                            },
+                      child: const Center(
+                        child: Text(
+                          "Sign in with Google",
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 25),

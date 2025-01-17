@@ -22,7 +22,11 @@ class VideoController extends StateNotifier<List<Video>> {
   /// Loads the list of videos and listens to changes in real-time
   void _loadVideos() {
     _firestore.collection('videos').snapshots().listen((QuerySnapshot query) {
-      List<Video> videos = query.docs.map((doc) => Video.fromSnap(doc)).toList();
+      List<Video> videos = query.docs
+          .map((doc) => Video.fromSnap(doc))
+          .toList()
+          .reversed
+          .toList();
       state = videos;
     });
   }
@@ -30,8 +34,9 @@ class VideoController extends StateNotifier<List<Video>> {
   /// Handles liking and unliking a video
   Future<void> likeVideo(String id) async {
     try {
-      DocumentSnapshot doc = await _firestore.collection('videos').doc(id).get();
-      
+      DocumentSnapshot doc =
+          await _firestore.collection('videos').doc(id).get();
+
       // Access current user through the authControllerProvider
       var user = ref.read(authControllerProvider);
       if (user == null) {
@@ -39,7 +44,7 @@ class VideoController extends StateNotifier<List<Video>> {
         print("User is not logged in");
         return;
       }
-      var uid = user.uid;  // Get user UID
+      var uid = user.uid; // Get user UID
 
       var likes = (doc.data()! as dynamic)['likes'] as List;
 
@@ -59,8 +64,3 @@ class VideoController extends StateNotifier<List<Video>> {
     }
   }
 }
-
-
-
-
-

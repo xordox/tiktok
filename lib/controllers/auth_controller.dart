@@ -108,57 +108,65 @@ class AuthController extends StateNotifier<User?> {
   }
 
   Future<bool> registerUser(BuildContext context, String username, String email,
-    String password, File? image) async {
-  final isLoading = ref.read(isLoadingProvider.notifier);
-  isLoading.state = true; // Start loading
+      String password, File? image) async {
+    final isLoading = ref.read(isLoadingProvider.notifier);
+    isLoading.state = true; // Start loading
 
-  try {
-    if (username.isEmpty || email.isEmpty || password.isEmpty || image == null) {
+    try {
+      if (username.isEmpty ||
+          email.isEmpty ||
+          password.isEmpty ||
+          image == null) {
+        ref.read(snackbarProvider).show(
+              context,
+              "Error Register User",
+              "Please enter all the fields",
+            );
+        return false;
+      }
+
+      UserCredential userCredential = await firebaseAuth
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      String downloadUrl = await _uploadToStorage(image);
+
+      model.User user = model.User(
+        name: username,
+        email: email,
+        password: password,
+        profileImage: downloadUrl,
+        uid: userCredential.user!.uid,
+      );
+
+      await firestore
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set(user.toJson());
+
+      log("User registered successfully: ${user.name}");
+      ref.read(snackbarProvider).show(
+            context,
+            "Success",
+            "User registered successfully",
+          );
+
+      return true;
+    } catch (e) {
       ref.read(snackbarProvider).show(
             context,
             "Error Register User",
-            "Please enter all the fields",
+            e.toString(),
           );
       return false;
+    } finally {
+      isLoading.state = false; // Stop loading
     }
-
-    UserCredential userCredential = await firebaseAuth
-        .createUserWithEmailAndPassword(email: email, password: password);
-
-    String downloadUrl = await _uploadToStorage(image);
-
-    model.User user = model.User(
-      name: username,
-      email: email,
-      password: password,
-      profileImage: downloadUrl,
-      uid: userCredential.user!.uid,
-    );
-
-    await firestore.collection('users').doc(userCredential.user!.uid).set(user.toJson());
-
-    log("User registered successfully: ${user.name}");
-    ref.read(snackbarProvider).show(
-          context,
-          "Success",
-          "User registered successfully",
-        );
-
-    return true;
-  } catch (e) {
-    ref.read(snackbarProvider).show(
-          context,
-          "Error Register User",
-          e.toString(),
-        );
-    return false;
-  } finally {
-    isLoading.state = false; // Stop loading
   }
-}
 
-
-  Future<void> signInWithGoogle(BuildContext context) async {
+  Future<void> signInWithGoogle(
+    BuildContext context,
+    Function onSuccess,
+  ) async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return;
@@ -188,6 +196,7 @@ class AuthController extends StateNotifier<User?> {
               .set(newUser.toJson());
         }
         fetchUserDetails(user.uid);
+        onSuccess();
       }
     } catch (e) {
       log(e.toString());
@@ -242,7 +251,6 @@ class AuthController extends StateNotifier<User?> {
       isLoading.state = false; // Reset loading state
     }
   }
-
 
   Future<void> logoutUser(BuildContext context) async {
     try {
