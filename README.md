@@ -1,18 +1,17 @@
-# tiktok
+KEY Features
 
-A new Flutter project.
+Firebase login using email/password and google signIn
+User registration 
+Validation while login and registration
+Isar for local db to save comments
+Comments linked to specific video
+Video upload using gallery and camera
+Functionality to like video and share video link
+Display circular progress indicator while logging and registering user for better UX
+Use of flutter riverpod for state management
+Display linear progress indicator according to duration of video played
+Ability to play/pause video
+Launcher icons
+Snack bar to notify user about missing fields while logging in and registration
+User ability to logout 
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-key features
