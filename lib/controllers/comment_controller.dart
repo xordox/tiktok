@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:tiktok/main.dart';
 import 'package:tiktok/models/video_comment.dart';
-import 'package:tiktok/constants.dart';
 
 final commentControllerProvider =
     StateNotifierProvider<CommentController, List<VideoComment>>((ref) {

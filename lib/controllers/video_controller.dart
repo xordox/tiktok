@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiktok/constants.dart';
 import 'package:tiktok/models/video.dart';
-import 'package:tiktok/controllers/auth_controller.dart'; // Import auth_controller
+import 'package:tiktok/controllers/auth_controller.dart'; 
 
 // Provider for the VideoController
 final videoControllerProvider =
@@ -41,7 +41,6 @@ class VideoController extends StateNotifier<List<Video>> {
       var user = ref.read(authControllerProvider);
       if (user == null) {
         // Handle the case where the user is not logged in
-        print("User is not logged in");
         return;
       }
       var uid = user.uid; // Get user UID

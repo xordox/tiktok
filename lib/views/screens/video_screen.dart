@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:share_plus/share_plus.dart';
-
-import 'package:tiktok/constants.dart';
 import 'package:tiktok/controllers/auth_controller.dart';
 import 'package:tiktok/controllers/comment_controller.dart';
 import 'package:tiktok/controllers/video_controller.dart';
 import 'package:tiktok/views/screens/comments_screen.dart';
 import 'package:tiktok/views/screens/search_screen.dart';
-import 'package:tiktok/views/widgets/circle_animation.dart';
 import 'package:tiktok/views/widgets/tabs.dart';
 import 'package:tiktok/views/widgets/video_player_item.dart';
 

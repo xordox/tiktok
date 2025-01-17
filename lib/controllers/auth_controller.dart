@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -46,7 +45,6 @@ class AuthController extends StateNotifier<User?> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final context = navigatorKey.currentContext;
       if (context == null) {
-        log("Navigation context is still null");
         return;
       }
 
@@ -98,10 +96,7 @@ class AuthController extends StateNotifier<User?> {
       final doc = await firestore.collection('users').doc(uid).get();
       if (doc.exists && doc.data() != null) {
         _currentUser = model.User.fromSnap(doc);
-        log('User details fetched: ${_currentUser!.name}');
-      } else {
-        log('Document does not exist or contains no data');
-      }
+      } 
     } catch (e) {
       log('Failed to fetch user details: $e');
     }
@@ -110,7 +105,7 @@ class AuthController extends StateNotifier<User?> {
   Future<bool> registerUser(BuildContext context, String username, String email,
       String password, File? image) async {
     final isLoading = ref.read(isLoadingProvider.notifier);
-    isLoading.state = true; // Start loading
+    isLoading.state = true; 
 
     try {
       if (username.isEmpty ||
@@ -143,7 +138,6 @@ class AuthController extends StateNotifier<User?> {
           .doc(userCredential.user!.uid)
           .set(user.toJson());
 
-      log("User registered successfully: ${user.name}");
       ref.read(snackbarProvider).show(
             context,
             "Success",
@@ -159,7 +153,7 @@ class AuthController extends StateNotifier<User?> {
           );
       return false;
     } finally {
-      isLoading.state = false; // Stop loading
+      isLoading.state = false; 
     }
   }
 
@@ -226,7 +220,7 @@ class AuthController extends StateNotifier<User?> {
         return;
       }
 
-      isLoading.state = true; // Set loading state to true
+      isLoading.state = true; 
 
       await firebaseAuth.signInWithEmailAndPassword(
         email: email,
@@ -248,7 +242,7 @@ class AuthController extends StateNotifier<User?> {
             e.toString(),
           );
     } finally {
-      isLoading.state = false; // Reset loading state
+      isLoading.state = false; 
     }
   }
 
@@ -266,14 +260,6 @@ class AuthController extends StateNotifier<User?> {
         ),
       );
     }
-  }
-
-  void _navigateToHome(BuildContext context) {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-      (route) => false,
-    );
   }
 
   void _navigateToLogin(BuildContext context) {

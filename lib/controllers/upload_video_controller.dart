@@ -48,7 +48,6 @@ class VideoUploadNotifier extends StateNotifier<UploadState> {
     UploadTask uploadTask = ref.putFile(await _compressVideo(videoPath));
     TaskSnapshot snap = await uploadTask;
     String downloadUrl = await snap.ref.getDownloadURL();
-    log("Video URL: $downloadUrl");
     return downloadUrl;
   }
 
@@ -62,7 +61,6 @@ class VideoUploadNotifier extends StateNotifier<UploadState> {
     UploadTask uploadTask = ref.putFile(await _getThumbnail(videoPath));
     TaskSnapshot snap = await uploadTask;
     String downloadUrl = await snap.ref.getDownloadURL();
-    log("Thumbnail URL: $downloadUrl");
     return downloadUrl;
   }
 
@@ -99,11 +97,9 @@ class VideoUploadNotifier extends StateNotifier<UploadState> {
 
       // Save to Firestore
       await _firestore.collection('videos').doc(videoId).set(video.toJson());
-      log("Video uploaded successfully: ${video.toJson()}");
 
       state = state.copyWith(isUploading: false);
     } catch (e) {
-      log("Error uploading video: $e");
       state = state.copyWith(isUploading: false, errorMessage: e.toString());
     }
   }
